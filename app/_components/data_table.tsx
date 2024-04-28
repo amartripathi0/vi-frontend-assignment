@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import {
     ColumnDef,
+    ColumnPinningState,
     RowSelectionState,
     flexRender,
     getCoreRowModel,
@@ -25,19 +26,26 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
-    const [rowSelection, setRowSelection] = useState<RowSelectionState>({}) 
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+    const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+        left: ["select", "id"],
+        right: [],
+    });
+
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        onRowSelectionChange : setRowSelection,
-        state : {
-            rowSelection
+        state: {
+            rowSelection,
+            columnPinning,
         },
-        enableMultiRowSelection : false
+        onRowSelectionChange: setRowSelection,
+        onColumnPinningChange: setColumnPinning,
+        enableMultiRowSelection: false,
     });
-    
+
     // TASK : Make first 2 columns (i.e. checkbox and task id) sticky
     // TASK : Make header columns resizable
 
@@ -47,10 +55,28 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} >
+                            <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead key={header.id} colSpan={header.colSpan}>
+                                        <TableHead
+                                            key={header.id}
+                                            colSpan={header.colSpan}
+                                            className={`${
+                                                header.column.getIsPinned() && "bg-white z-10"
+                                            } hover:bg-muted`}
+                                            style={{
+                                                position: header.column.getIsPinned()
+                                                    ? "sticky"
+                                                    : undefined,
+                                                border: "7px",
+                                                left: header.column.getIsPinned()
+                                                    ? `${header.column.getStart() / 6}px`
+                                                    : undefined,
+                                                width: header.column.getSize()
+                                                    ? `${header.column.getSize() / 5}px`
+                                                    : undefined,
+                                            }}
+                                        >
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -71,7 +97,24 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                                     data-state={row.getIsSelected() && "selected"}
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell
+                                            key={cell.id}
+                                            className={`${
+                                                cell.column.getIsPinned() &&
+                                                "lg:z-10 max-lg:bg-white hover:bg-muted"
+                                            }`}
+                                            style={{
+                                                left: cell.column.getIsPinned()
+                                                    ? `${cell.column.getStart() / 6}px`
+                                                    : undefined,
+                                                width: cell.column.getSize()
+                                                    ? `${cell.column.getSize() / 5}px`
+                                                    : undefined,
+                                                position: cell.column.getIsPinned()
+                                                    ? "sticky"
+                                                    : undefined,
+                                            }}
+                                        >
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext(),

@@ -22,11 +22,17 @@ export const columns: Array<ColumnDef<Task>> = [
                 onChangeHandler={row.getToggleSelectedHandler()}
             />
         ),
+        meta : {
+            className: "sticky left-0 "
+        }
     },
     {
         accessorKey: "id",
         header: ({ column }) => <span>Task</span>,
         cell: ({ row }) => <div className="w-[80px]">{row.getValue("id")}</div>,
+        meta : {
+            className: "sticky left-0 "
+        }
     },
     {
         accessorKey: "title",
