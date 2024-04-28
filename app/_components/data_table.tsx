@@ -10,12 +10,14 @@ import {
 } from "@/components/ui/table";
 import {
     ColumnDef,
+    RowSelectionState,
     flexRender,
     getCoreRowModel,
     getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import { DataTablePagination } from "./data-table-pagination";
+import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -23,13 +25,19 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({}) 
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        onRowSelectionChange : setRowSelection,
+        state : {
+            rowSelection
+        },
+        enableMultiRowSelection : false
     });
-
+    
     // TASK : Make first 2 columns (i.e. checkbox and task id) sticky
     // TASK : Make header columns resizable
 
@@ -39,7 +47,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
+                            <TableRow key={headerGroup.id} >
                                 {headerGroup.headers.map((header) => {
                                     return (
                                         <TableHead key={header.id} colSpan={header.colSpan}>

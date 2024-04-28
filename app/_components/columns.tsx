@@ -4,8 +4,25 @@ import { Badge } from "@/components/ui/badge";
 import { type ColumnDef } from "@tanstack/react-table";
 import { labels, priorities, statuses } from "../_constants/metadata";
 import { type Task } from "../_constants/schema";
+import React from "react";
 
 export const columns: Array<ColumnDef<Task>> = [
+    {
+        accessorKey: "select",
+        header: ({ table }) => (
+            <CheckboxRowSelection
+                checked={table.getIsSomeRowsSelected()}
+                onChangeHandler={() => {}}
+
+            />
+        ),
+        cell: ({ row, table }) => (
+            <CheckboxRowSelection
+                checked={row.getIsSelected()}
+                onChangeHandler={row.getToggleSelectedHandler()}
+            />
+        ),
+    },
     {
         accessorKey: "id",
         header: ({ column }) => <span>Task</span>,
@@ -68,3 +85,12 @@ export const columns: Array<ColumnDef<Task>> = [
         },
     },
 ];
+
+type CheckboxRowSelectionProps = {
+    checked: boolean;
+    onChangeHandler ?: React.ChangeEventHandler<HTMLInputElement>;
+};
+
+function CheckboxRowSelection({ checked, onChangeHandler }: CheckboxRowSelectionProps) {
+    return <input type="checkbox" checked={checked} onChange={onChangeHandler} />;
+}
