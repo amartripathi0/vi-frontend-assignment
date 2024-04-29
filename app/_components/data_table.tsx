@@ -19,6 +19,7 @@ import {
 } from "@tanstack/react-table";
 import { DataTablePagination } from "./data-table-pagination";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -44,6 +45,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         onRowSelectionChange: setRowSelection,
         onColumnPinningChange: setColumnPinning,
         enableMultiRowSelection: false,
+        columnResizeMode: "onChange",
     });
 
     // TASK : Make first 2 columns (i.e. checkbox and task id) sticky
@@ -52,38 +54,52 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     return (
         <div className="space-y-4">
             <div className="rounded-md border">
-                <Table>
+                <Table
+                    {...{
+                        style: {
+                            minWidth: table.getCenterTotalSize(),
+                        },
+                    }}
+                >
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead
-                                            key={header.id}
-                                            colSpan={header.colSpan}
-                                            className={`${
-                                                header.column.getIsPinned() && "bg-white z-10"
-                                            } hover:bg-muted`}
-                                            style={{
-                                                position: header.column.getIsPinned()
-                                                    ? "sticky"
-                                                    : undefined,
-                                                border: "7px",
-                                                left: header.column.getIsPinned()
-                                                    ? `${header.column.getStart() / 6}px`
-                                                    : undefined,
-                                                width: header.column.getSize()
-                                                    ? `${header.column.getSize() / 5}px`
-                                                    : undefined,
-                                            }}
-                                        >
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                      header.column.columnDef.header,
-                                                      header.getContext(),
-                                                  )}
-                                        </TableHead>
+                                        header.column.getCanResize() && (
+                                            <TableHead
+                                                key={header.id}
+                                                colSpan={header.colSpan}
+                                                className={cn(
+                                                    `hover:bg-muted w-[${header.column.getSize()}px]`,
+                                                    header.column.getIsPinned() &&
+                                                        `bg-white sticky left-[${
+                                                            header.column.getStart() / 5
+                                                        }}]px w-[${header.column.getSize() / 5}px]`,
+                                                )}
+                                                style={{
+                                                    transform: header.column.getIsResizing()
+                                                        ? `translateX(${
+                                                              table.getState().columnSizingInfo
+                                                                  .deltaOffset
+                                                          }px)`
+                                                        : "",
+                                                }}
+                                            >
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                          header.column.columnDef.header,
+                                                          header.getContext(),
+                                                      )}
+
+                                                <div
+                                                    className="w-1 h-full absolute top-0 right-0 select-none touch-none cursor-col-resize group-hover:bg-muted-foreground/20"
+                                                    onMouseDown={header.getResizeHandler()}
+                                                    onTouchStart={header.getResizeHandler()}
+                                                />
+                                            </TableHead>
+                                        )
                                     );
                                 })}
                             </TableRow>
@@ -99,21 +115,13 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell
                                             key={cell.id}
-                                            className={`${
+                                            className={cn(
+                                                `w-[${cell.column.getSize()}px]`,
                                                 cell.column.getIsPinned() &&
-                                                "lg:z-10 max-lg:bg-white hover:bg-muted"
-                                            }`}
-                                            style={{
-                                                left: cell.column.getIsPinned()
-                                                    ? `${cell.column.getStart() / 6}px`
-                                                    : undefined,
-                                                width: cell.column.getSize()
-                                                    ? `${cell.column.getSize() / 5}px`
-                                                    : undefined,
-                                                position: cell.column.getIsPinned()
-                                                    ? "sticky"
-                                                    : undefined,
-                                            }}
+                                                    `lg:z-10 max-lg:bg-white hover:bg-muted stikcy left-[${
+                                                        cell.column.getStart() / 5
+                                                    }px]`,
+                                            )}
                                         >
                                             {flexRender(
                                                 cell.column.columnDef.cell,

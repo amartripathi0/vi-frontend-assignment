@@ -22,9 +22,7 @@ export const columns: Array<ColumnDef<Task>> = [
                 onChangeHandler={row.getToggleSelectedHandler()}
             />
         ),
-        meta : {
-            className: "sticky left-0 "
-        }
+        size: 100
     },
     {
         accessorKey: "id",
